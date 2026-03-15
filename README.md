@@ -1,52 +1,67 @@
 ## Design and Implementation of LangChain Expression Language (LCEL) Expressions
 
-### AIM:
-To design and implement a LangChain Expression Language (LCEL) expression that utilizes at least two prompt parameters and three key components (prompt, model, and output parser), and to evaluate its functionality by analyzing relevant examples of its application in real-world scenarios.
 
-### PROBLEM STATEMENT:
-To create a versatile tool for an e-commerce platform that can automatically generate engaging and concise marketing descriptions for new products. The tool must take the product's name and a list of its key features as input and produce a ready-to-use description as a simple string output.
+## AIM:  
+To design and implement a LangChain Expression Language (LCEL) expression that utilizes at least two prompt parameters and three key components (prompt, model, and output parser), and to evaluate its functionality by analyzing relevant examples of its application in real-world scenarios.  
 
-### DESIGN STEPS:
 
-#### STEP 1:
- Design a Multi-Parameter Prompt Template
+## PROBLEM STATEMENT:  
+Develop an LCEL-based application to process expressions with dynamic parameters, leveraging a prompt template for structured interaction, a language model to process the input, and an output parser for extracting meaningful results.
 
-#### STEP 2:
-Select the Core Components (Model and Parser). Here, my model is ChatOpenAI() and parser is StrOutputParser()
 
-#### STEP 3:
-Construct the LCEL Chain using pipeline (|) where this would connect the components together which are (prompt| model | output parser) 
+## DESIGN STEPS:  
+1. **STEP 1:** Create a prompt template with placeholders for at least two parameters.  
+2. **STEP 2:** Use LangChain's language model to process the prompt and generate a response.  
+3. **STEP 3:** Implement an output parser to extract structured results from the model's response.
 
-### PROGRAM:
-```
-import os
-import openai
 
-from dotenv import load_dotenv, find_dotenv
-_ = load_dotenv(find_dotenv()) # read local .env file
-openai.api_key = os.environ['OPENAI_API_KEY']
+## PROGRAM:  
 
-from langchain.prompts import ChatPromptTemplate
-from langchain.chat_models import ChatOpenAI
-from langchain.schema.output_parser import StrOutputParser
+```python
+from langchain.prompts import PromptTemplate
+from langchain.llms import OpenAI
+from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 
-prompt = ChatPromptTemplate.from_template(
-   "Tell me about {topic} in the style of {style}"
+# Define the prompt template with two parameters
+prompt = PromptTemplate(
+    input_variables=["topic", "context"],
+    template="Write a summary about {topic} based on the following context: {context}"
 )
-model = ChatOpenAI()
-output_parser = StrOutputParser()
-model = ChatOpenAI()
-output_parser = StrOutputParser()
 
-chain = prompt | model | output_parser
+# Initialize the language model
+llm = OpenAI(model="text-davinci-003", temperature=0.7)
 
-chain.invoke({ "topic": "the moon",
-    "style": "a short poem"})
+# Define the response schema for the output parser
+response_schemas = [
+    ResponseSchema(name="summary", description="A concise summary of the topic"),
+    ResponseSchema(name="key_points", description="Main points covered in the summary")
+]
+
+output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
+
+# Example function to evaluate the LCEL expression
+def evaluate_expression(topic, context):
+    # Generate the prompt with input parameters
+    formatted_prompt = prompt.format(topic=topic, context=context)
+    
+    # Get the response from the LLM
+    raw_output = llm(formatted_prompt)
+    
+    # Parse the output into a structured format
+    parsed_output = output_parser.parse(raw_output)
+    
+    return parsed_output
+
+# Example usage
+if __name__ == "__main__":
+    topic = "Artificial Intelligence"
+    context = "Artificial Intelligence is a field of study focusing on creating machines capable of mimicking human intelligence. It includes machine learning, robotics, and natural language processing."
+    result = evaluate_expression(topic, context)
+    print("LCEL Expression Output:")
+    print(result)
 ```
+## OUTPUT:
+![image](https://github.com/user-attachments/assets/444ceaf6-aa2d-42b4-bf27-42162d8b51fc)
 
-### OUTPUT:
-<img width="1250" height="112" alt="image" src="https://github.com/user-attachments/assets/9c2d5603-64f0-4532-8d90-c7410954fb23" />
-
-
-### RESULT:
-The LangChain Expression Language (LCEL) chain was successfully designed and implemented. The program effectively utilized a ChatPromptTemplate with two parameters (topic and style), a ChatOpenAI model, and a StrOutputParser. 
+## RESULT:
+Hence,the program to design and implement a LangChain Expression Language (LCEL) expression that utilizes at least two prompt parameters and three key components (prompt, model, and output parser), and to evaluate its functionality by analyzing relevant examples of its application in real-world scenarios is written and successfully executed.
